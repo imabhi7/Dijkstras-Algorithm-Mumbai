@@ -1,5 +1,6 @@
+"use client"
+
 import React, { useState } from 'react'
-import './MumbaiRailNetwork.css'
 
 type Graph = number[][]
 type Station = {
@@ -177,118 +178,226 @@ const graph: Graph = [
 ]
 
 export default function MumbaiRailNetwork() {
-    const [start, setStart] = useState('')
-    const [end, setEnd] = useState('')
-    const [path, setPath] = useState<number[]>([])
-  
-    // Dijkstra's algorithm implementation
-    const dijkstra = (graph: Graph, source: number, target: number) => {
-      const dist: number[] = new Array(graph.length).fill(Infinity)
-      const prev: (number | null)[] = new Array(graph.length).fill(null)
-      const queue: number[] = []
-  
-      dist[source] = 0
-      queue.push(source)
-  
-      while (queue.length > 0) {
-        const u = queue.reduce((a, b) => dist[a] < dist[b] ? a : b)
-        if (u === target) break
-        queue.splice(queue.indexOf(u), 1)
-  
-        for (let v = 0; v < graph.length; v++) {
-          if (graph[u][v] !== 0) {
-            const alt = dist[u] + graph[u][v]
-            if (alt < dist[v]) {
-              dist[v] = alt
-              prev[v] = u
-              queue.push(v)
-            }
+  const [start, setStart] = useState('')
+  const [end, setEnd] = useState('')
+  const [path, setPath] = useState<number[]>([])
+
+  // Dijkstra's algorithm implementation
+  const dijkstra = (graph: Graph, source: number, target: number) => {
+    const dist: number[] = new Array(graph.length).fill(Infinity)
+    const prev: (number | null)[] = new Array(graph.length).fill(null)
+    const queue: number[] = []
+
+    dist[source] = 0
+    queue.push(source)
+
+    while (queue.length > 0) {
+      const u = queue.reduce((a, b) => dist[a] < dist[b] ? a : b)
+      if (u === target) break
+      queue.splice(queue.indexOf(u), 1)
+
+      for (let v = 0; v < graph.length; v++) {
+        if (graph[u][v] !== 0) {
+          const alt = dist[u] + graph[u][v]
+          if (alt < dist[v]) {
+            dist[v] = alt
+            prev[v] = u
+            queue.push(v)
           }
         }
       }
-  
-      const path: number[] = []
-      let u: number | null = target
-      while (u !== null) {
-        path.unshift(u)
-        u = prev[u]
-      }
-      return path
     }
-  
-    const handleFindPath = () => {
-      const startNum = parseInt(start)
-      const endNum = parseInt(end)
-      if (isNaN(startNum) || isNaN(endNum)) {
-        alert('Please enter valid station numbers')
-        return
-      }
-      const shortestPath = dijkstra(graph, startNum, endNum)
-      setPath(shortestPath)
+
+    const path: number[] = []
+    let u: number | null = target
+    while (u !== null) {
+      path.unshift(u)
+      u = prev[u]
     }
-  
-    return (
-      <div className="container">
-        <h1>Mumbai Suburban Rail Network</h1>
-        <div className="input-group">
-          <div className="input-container">
-            <label htmlFor="start">Start Station</label>
-            <input
-              id="start"
-              type="number"
-              value={start}
-              onChange={(e) => setStart(e.target.value)}
-              placeholder="Enter start station number"
-            />
-          </div>
-          <div className="input-container">
-            <label htmlFor="end">End Station</label>
-            <input
-              id="end"
-              type="number"
-              value={end}
-              onChange={(e) => setEnd(e.target.value)}
-              placeholder="Enter end station number"
-            />
-          </div>
-          <button onClick={handleFindPath}>Find Shortest Path</button>
+    return path
+  }
+
+  // Helper function to determine line color
+  const getLineColor = (station1: number, station2: number): string => {
+    // Western Line (Red)
+    if (station1 >= 51 && station1 <= 75 && station2 >= 51 && station2 <= 75) {
+      return "#FF0000"
+    }
+    // Central Line (Green)
+    if (station1 <= 24 && station2 <= 24) {
+      return "#008000"
+    }
+    // Harbour Line (Blue)
+    if ((station1 >= 25 && station1 <= 46) || (station2 >= 25 && station2 <= 46)) {
+      return "#0000FF"
+    }
+    // Trans-harbour Line (Yellow)
+    if ((station1 >= 47 && station1 <= 50) || (station2 >= 47 && station2 <= 50)) {
+      return "#FFD700"
+    }
+    // Vasai-Diva Line (Pink)
+    if ((station1 >= 76 && station1 <= 79) || (station2 >= 76 && station2 <= 79)) {
+      return "#FF69B4"
+    }
+    return "#000000"
+  }
+
+  const handleFindPath = () => {
+    const startNum = parseInt(start)
+    const endNum = parseInt(end)
+    if (isNaN(startNum) || isNaN(endNum)) {
+      alert('Please enter valid station numbers')
+      return
+    }
+    const shortestPath = dijkstra(graph, startNum, endNum)
+    setPath(shortestPath)
+  }
+
+  return (
+    <div style={{
+      maxWidth: '1200px',
+      margin: '0 auto',
+      padding: '2rem',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+    }}>
+      <h1 style={{
+        fontSize: '2rem',
+        fontWeight: 'bold',
+        marginBottom: '1.5rem',
+        textAlign: 'center',
+        color: '#333'
+      }}>
+        Mumbai Suburban Rail Network
+      </h1>
+      <div style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: '1rem',
+        marginBottom: '1.5rem'
+      }}>
+        <div style={{ flex: 1, minWidth: '200px' }}>
+          <label htmlFor="start" style={{
+            display: 'block',
+            marginBottom: '0.5rem',
+            fontWeight: 600,
+            color: '#555'
+          }}>
+            Start Station
+          </label>
+          <input
+            id="start"
+            type="number"
+            value={start}
+            onChange={(e) => setStart(e.target.value)}
+            placeholder="Enter start station number"
+            style={{
+              width: '100%',
+              padding: '0.75rem',
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              fontSize: '1rem'
+            }}
+          />
         </div>
-        <div className="svg-container">
-          <svg width="100%" height="100%" viewBox="0 0 800 650">
-            {stations.map((station) => (
-              <g key={station.id}>
-                <circle
-                  cx={station.x}
-                  cy={station.y}
-                  r="5"
-                  fill={path.includes(station.id) ? "red" : "black"}
-                />
-                <text x={station.x + 10} y={station.y} fontSize="9">
-                  {station.name}
-                </text>
-                {graph[station.id] && graph[station.id].map((connection, index) => {
-                  if (connection === 1) {
-                    const connectedStation = stations[index]
-                    if (connectedStation) {
-                      return (
-                        <line
-                          key={`${station.id}-${index}`}
-                          x1={station.x}
-                          y1={station.y}
-                          x2={connectedStation.x}
-                          y2={connectedStation.y}
-                          stroke={path.includes(station.id) && path.includes(index) ? "red" : "black"}
-                          strokeWidth="2"
-                        />
-                      )
-                    }
-                  }
-                  return null
-                })}
-              </g>
-            ))}
-          </svg>
+        <div style={{ flex: 1, minWidth: '200px' }}>
+          <label htmlFor="end" style={{
+            display: 'block',
+            marginBottom: '0.5rem',
+            fontWeight: 600,
+            color: '#555'
+          }}>
+            End Station
+          </label>
+          <input
+            id="end"
+            type="number"
+            value={end}
+            onChange={(e) => setEnd(e.target.value)}
+            placeholder="Enter end station number"
+            style={{
+              width: '100%',
+              padding: '0.75rem',
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              fontSize: '1rem'
+            }}
+          />
+        </div>
+        <div style={{ flex: 1, minWidth: '200px', display: 'flex', alignItems: 'flex-end' }}>
+          <button 
+            onClick={handleFindPath}
+            style={{
+              width: '100%',
+              padding: '0.75rem 1.5rem',
+              backgroundColor: '#0070f3',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '1rem',
+              fontWeight: 600
+            }}
+          >
+            Find Shortest Path
+          </button>
         </div>
       </div>
-    )
-  }
+      
+      <div style={{
+        width: '100%',
+        maxWidth: '1000px',
+        height: 'auto',
+        aspectRatio: '800 / 650',
+        margin: '0 auto',
+        border: '1px solid #ccc',
+        borderRadius: '8px',
+        overflow: 'hidden',
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+      }}>
+        <svg width="100%" height="100%" viewBox="0 0 800 650" style={{ padding: '1rem' }}>
+          {stations.map((station) => (
+            <g key={station.id}>
+              {graph[station.id] && graph[station.id].map((connection, index) => {
+                if (connection === 1) {
+                  const connectedStation = stations[index]
+                  if (connectedStation) {
+                    const lineColor = getLineColor(station.id, index)
+                    return (
+                      <line
+                        key={`${station.id}-${index}`}
+                        x1={station.x}
+                        y1={station.y}
+                        x2={connectedStation.x}
+                        y2={connectedStation.y}
+                        stroke={path.includes(station.id) && path.includes(index) ? "#FF0000" : lineColor}
+                        strokeWidth="3"
+                      />
+                    )
+                  }
+                }
+                return null
+              })}
+              <circle
+                cx={station.x}
+                cy={station.y}
+                r="6"
+                fill={path.includes(station.id) ? "#FF0000" : "#FFFFFF"}
+                stroke="#000000"
+                strokeWidth="2"
+              />
+              <text
+                x={station.x + 12}
+                y={station.y + 4}
+                fontSize="10"
+                fontFamily="sans-serif"
+                fill="#000000"
+              >
+                {station.name} ({station.id})
+              </text>
+            </g>
+          ))}
+        </svg>
+      </div>
+    </div>
+  )
+}
