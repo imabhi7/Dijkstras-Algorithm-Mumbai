@@ -243,29 +243,31 @@ export default function MumbaiRailNetwork() {
   }
 
   const handleFindPath = () => {
-    const startNum = parseInt(start)
-    const endNum = parseInt(end)
-    if (isNaN(startNum) || isNaN(endNum)) {
-      alert('Please enter valid station numbers')
+    const startStation = stations.find(s => s.name.toLowerCase() === start.toLowerCase())
+    const endStation = stations.find(s => s.name.toLowerCase() === end.toLowerCase())
+    
+    if (!startStation || !endStation) {
+      alert('Please enter valid station names')
       return
     }
-    const shortestPath = dijkstra(graph, startNum, endNum)
+    
+    const shortestPath = dijkstra(graph, startStation.id, endStation.id)
     setPath(shortestPath)
   }
 
   return (
     <div style={{
-      maxWidth: '1200px',
-      margin: '0 auto',
-      padding: '2rem',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+      display: 'flex',
+      flexDirection: 'column',
+      padding: '1rem',
+      fontFamily: 'Arial, sans-serif',
     }}>
       <h1 style={{
-        fontSize: '2rem',
+        fontSize: '1.5rem',
         fontWeight: 'bold',
-        marginBottom: '1.5rem',
+        marginBottom: '1rem',
         textAlign: 'center',
-        color: '#333'
+        color: '#333',
       }}>
         Mumbai Suburban Rail Network
       </h1>
@@ -273,69 +275,69 @@ export default function MumbaiRailNetwork() {
         display: 'flex',
         flexWrap: 'wrap',
         gap: '1rem',
-        marginBottom: '1.5rem'
+        marginBottom: '1rem',
       }}>
-        <div style={{ flex: 1, minWidth: '200px' }}>
+        <div style={{ flex: '1', minWidth: '200px' }}>
           <label htmlFor="start" style={{
             display: 'block',
             marginBottom: '0.5rem',
-            fontWeight: 600,
-            color: '#555'
+            fontWeight: 'bold',
+            color: '#555',
           }}>
             Start Station
           </label>
           <input
             id="start"
-            type="number"
+            type="text"
             value={start}
             onChange={(e) => setStart(e.target.value)}
-            placeholder="Enter start station number"
+            placeholder="Enter start station name"
             style={{
               width: '100%',
-              padding: '0.75rem',
+              padding: '0.5rem',
               border: '1px solid #ccc',
               borderRadius: '4px',
-              fontSize: '1rem'
+              fontSize: '0.875rem',
             }}
           />
         </div>
-        <div style={{ flex: 1, minWidth: '200px' }}>
+        <div style={{ flex: '1', minWidth: '200px' }}>
           <label htmlFor="end" style={{
             display: 'block',
             marginBottom: '0.5rem',
-            fontWeight: 600,
-            color: '#555'
+            fontWeight: 'bold',
+            color: '#555',
           }}>
             End Station
           </label>
           <input
             id="end"
-            type="number"
+            type="text"
             value={end}
             onChange={(e) => setEnd(e.target.value)}
-            placeholder="Enter end station number"
+            placeholder="Enter end station name"
             style={{
               width: '100%',
-              padding: '0.75rem',
+              padding: '0.5rem',
               border: '1px solid #ccc',
               borderRadius: '4px',
-              fontSize: '1rem'
+              fontSize: '0.875rem',
             }}
           />
         </div>
-        <div style={{ flex: 1, minWidth: '200px', display: 'flex', alignItems: 'flex-end' }}>
+        <div style={{ flex: '1', minWidth: '200px', display: 'flex', alignItems: 'flex-end' }}>
           <button 
             onClick={handleFindPath}
             style={{
               width: '100%',
-              padding: '0.75rem 1.5rem',
+              padding: '0.5rem 1rem',
               backgroundColor: '#0070f3',
               color: 'white',
               border: 'none',
               borderRadius: '4px',
               cursor: 'pointer',
-              fontSize: '1rem',
-              fontWeight: 600
+              fontSize: '0.875rem',
+              fontWeight: 'bold',
             }}
           >
             Find Shortest Path
@@ -344,59 +346,108 @@ export default function MumbaiRailNetwork() {
       </div>
       
       <div style={{
-        width: '100%',
-        maxWidth: '1000px',
-        height: 'auto',
-        aspectRatio: '800 / 650',
-        margin: '0 auto',
-        border: '1px solid #ccc',
-        borderRadius: '8px',
-        overflow: 'hidden',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+        display: 'flex',
+        flexDirection: 'row',
+        gap: '1rem',
       }}>
-        <svg width="100%" height="100%" viewBox="0 0 800 650" style={{ padding: '1rem' }}>
-          {stations.map((station) => (
-            <g key={station.id}>
-              {graph[station.id] && graph[station.id].map((connection, index) => {
-                if (connection === 1) {
-                  const connectedStation = stations[index]
-                  if (connectedStation) {
-                    const lineColor = getLineColor(station.id, index)
-                    return (
-                      <line
-                        key={`${station.id}-${index}`}
-                        x1={station.x}
-                        y1={station.y}
-                        x2={connectedStation.x}
-                        y2={connectedStation.y}
-                        stroke={path.includes(station.id) && path.includes(index) ? "#FF0000" : lineColor}
-                        strokeWidth="3"
-                      />
-                    )
+        <div style={{
+          flex: '1',
+          border: '1px solid #ccc',
+          borderRadius: '8px',
+          overflow: 'hidden',
+        }}>
+          <svg width="100%" height="600" viewBox="0 0 800 600" style={{ backgroundColor: 'white' }}>
+            {stations.map((station) => (
+              <g key={station.id}>
+                {graph[station.id] && graph[station.id].map((connection, index) => {
+                  if (connection === 1) {
+                    const connectedStation = stations[index]
+                    if (connectedStation) {
+                      const lineColor = getLineColor(station.id, index)
+                      return (
+                        <line
+                          key={`${station.id}-${index}`}
+                          x1={station.x}
+                          y1={station.y}
+                          x2={connectedStation.x}
+                          y2={connectedStation.y}
+                          stroke={path.includes(station.id) && path.includes(index) ? "#FF0000" : lineColor}
+                          strokeWidth="2"
+                        />
+                      )
+                    }
                   }
-                }
-                return null
-              })}
-              <circle
-                cx={station.x}
-                cy={station.y}
-                r="6"
-                fill={path.includes(station.id) ? "#FF0000" : "#FFFFFF"}
-                stroke="#000000"
-                strokeWidth="2"
-              />
-              <text
-                x={station.x + 12}
-                y={station.y + 4}
-                fontSize="10"
-                fontFamily="sans-serif"
-                fill="#000000"
-              >
-                {station.name} ({station.id})
-              </text>
-            </g>
-          ))}
-        </svg>
+                  return null
+                })}
+                <circle
+                  cx={station.x}
+                  cy={station.y}
+                  r="6"
+                  fill={path.includes(station.id) ? "#FF0000" : "#FFFFFF"}
+                  stroke="#000000"
+                  strokeWidth="1"
+                />
+                <text
+                  x={station.x}
+                  y={station.y + 3}
+                  fontSize="8"
+                  fontFamily="sans-serif"
+                  fill="#000000"
+                  textAnchor="middle"
+                >
+                  {station.id}
+                </text>
+              </g>
+            ))}
+          </svg>
+        </div>
+        <div style={{
+          flex: '0 0 300px',
+          overflowY: 'auto',
+          maxHeight: '600px',
+        }}>
+          <h2 style={{
+            fontSize: '1.25rem',
+            fontWeight: 'bold',
+            marginBottom: '0.5rem',
+            color: '#333',
+          }}>Station List</h2>
+          <table style={{
+            width: '100%',
+            borderCollapse: 'collapse',
+          }}>
+            <thead>
+              <tr>
+                <th style={{
+                  padding: '0.5rem',
+                  textAlign: 'left',
+                  borderBottom: '2px solid #ccc',
+                  backgroundColor: '#f0f0f0',
+                }}>Node</th>
+                <th style={{
+                  padding: '0.5rem',
+                  textAlign: 'left',
+                  borderBottom: '2px solid #ccc',
+                  backgroundColor: '#f0f0f0',
+                }}>Station Name</th>
+              </tr>
+            </thead>
+            <tbody>
+              {stations.map((station) => (
+                <tr key={station.id}>
+                  <td style={{
+                    padding: '0.5rem',
+                    borderBottom: '1px solid #eee',
+                  }}>{station.id}</td>
+                  <td style={{
+                    padding: '0.5rem',
+                    borderBottom: '1px solid #eee',
+                  }}>{station.name}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )
