@@ -270,7 +270,7 @@ export default function MumbaiRailNetwork() {
         textAlign: 'center',
         color: '#333',
       }}>
-        Mumbai Suburban Rail Network
+        Mumbai Local Journey Planner
       </h1>
       <div style={{
         display: 'flex',
